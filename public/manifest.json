@@ -1,0 +1,16 @@
+{
+  "name": "Library Management System",
+  "short_name": "Library MS",
+  "description": "A comprehensive library management solution",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4F46E5",
+  "icons": [
+    {
+      "src": "/vite.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

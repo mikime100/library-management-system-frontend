@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Library Management System - A comprehensive solution for managing books, members, and borrowing operations."
+    />
+    <meta name="theme-color" content="#4F46E5" />
+    <link rel="manifest" href="/manifest.json" />
+    <title>Library Management System</title>
+
+    <!-- Preload critical resources -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- DNS prefetch for external APIs -->
+    <link
+      rel="dns-prefetch"
+      href="https://back-end-for-assessment.vercel.app"
+    />
+
+    <!-- Preload critical CSS -->
+    <link rel="preload" href="/src/index.css" as="style" />
+
+    <!-- Resource hints -->
+    <link rel="preload" href="/src/main.tsx" as="script" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
