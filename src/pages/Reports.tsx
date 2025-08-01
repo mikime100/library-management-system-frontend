@@ -33,38 +33,94 @@ interface SummaryStats {
 }
 
 const fetchOverdueBooks = async (): Promise<OverdueBook[]> => {
-  const { data } = await api.get("/borrow-records/reports/overdue");
-  return data.map((book: any) => ({
-    id: book.id?.toString() ?? "",
-    title: typeof book.title === "string" ? book.title : "",
-    memberName: typeof book.memberName === "string" ? book.memberName : "",
-    dueDate: typeof book.dueDate === "string" ? book.dueDate : "",
-    daysOverdue: typeof book.daysOverdue === "number" ? book.daysOverdue : 0,
-  }));
+  try {
+    const { data } = await api.get("/borrow-records/reports/overdue");
+
+    if (!data || !Array.isArray(data)) {
+      return [];
+    }
+
+    return data.map((book: any, index: number) => ({
+      id:
+        book.id?.toString() ??
+        book.borrow_record_id?.toString() ??
+        `book-${index}`,
+      title: book.book?.title ?? book.title ?? "Unknown Book",
+      memberName: book.member?.name ?? book.member_name ?? "Unknown Member",
+      dueDate: book.due_date ?? book.dueDate ?? "",
+      daysOverdue:
+        typeof book.days_overdue === "number"
+          ? book.days_overdue
+          : typeof book.daysOverdue === "number"
+          ? book.daysOverdue
+          : 0,
+    }));
+  } catch (error) {
+    console.error("Error fetching overdue books:", error);
+    throw error;
+  }
 };
 
 const fetchPopularGenres = async (): Promise<PopularGenre[]> => {
-  const { data } = await api.get("/borrow-records/reports/popular-genres");
-  return data.map((genre: any) => ({
-    name: typeof genre.name === "string" ? genre.name : "",
-    borrowCount: typeof genre.borrowCount === "number" ? genre.borrowCount : 0,
-    percentage: typeof genre.percentage === "number" ? genre.percentage : 0,
-  }));
+  try {
+    const { data } = await api.get("/borrow-records/reports/popular-genres");
+
+    if (!data || !Array.isArray(data)) {
+      return [];
+    }
+
+    return data.map((genre: any) => ({
+      name: genre.name ?? genre.genre_name ?? "Unknown Genre",
+      borrowCount:
+        typeof genre.borrow_count === "number"
+          ? genre.borrow_count
+          : typeof genre.borrowCount === "number"
+          ? genre.borrowCount
+          : 0,
+      percentage: typeof genre.percentage === "number" ? genre.percentage : 0,
+    }));
+  } catch (error) {
+    console.error("Error fetching popular genres:", error);
+    throw error;
+  }
 };
 
 const fetchSummaryStats = async (): Promise<SummaryStats> => {
-  const { data } = await api.get("/borrow-records/reports/summary");
-  return {
-    totalBorrowsThisMonth:
-      typeof data.totalBorrowsThisMonth === "number"
-        ? data.totalBorrowsThisMonth
-        : 0,
-    averageBorrowDuration:
-      typeof data.averageBorrowDuration === "number"
-        ? data.averageBorrowDuration
-        : 0,
-    returnRate: typeof data.returnRate === "number" ? data.returnRate : 0,
-  };
+  try {
+    const { data } = await api.get("/borrow-records/reports/summary");
+
+    if (!data) {
+      return {
+        totalBorrowsThisMonth: 0,
+        averageBorrowDuration: 0,
+        returnRate: 0,
+      };
+    }
+
+    return {
+      totalBorrowsThisMonth:
+        typeof data.total_borrows_this_month === "number"
+          ? data.total_borrows_this_month
+          : typeof data.totalBorrowsThisMonth === "number"
+          ? data.totalBorrowsThisMonth
+          : 0,
+      averageBorrowDuration:
+        typeof data.average_borrow_duration === "number"
+          ? data.average_borrow_duration
+          : typeof data.averageBorrowDuration === "number"
+          ? data.averageBorrowDuration
+          : 0,
+      returnRate:
+        typeof data.return_rate === "number"
+          ? data.return_rate
+          : typeof data.returnRate === "number"
+          ? data.returnRate
+          : 0,
+    };
+  } catch (error) {
+    console.error("Error fetching summary stats:", error);
+    throw error;
+  }
 };
 
 export default function Reports() {
@@ -103,34 +159,56 @@ export default function Reports() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+      <div className="px-8 py-8">
+        <div className="mb-8">
+          <h1 className="text-4xl font-extrabold text-gray-900">Reports</h1>
+          <p className="text-gray-500 text-lg mt-1">
+            Library analytics and reports
+          </p>
+        </div>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <Loader2 className="w-8 h-8 animate-spin text-indigo-600 mx-auto mb-4" />
+            <p className="text-gray-600">Loading reports...</p>
+          </div>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="bg-red-50 border-l-4 border-red-400 p-4">
-        <div className="flex">
-          <div className="flex-shrink-0">
-            <svg
-              className="h-5 w-5 text-red-400"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path
-                fillRule="evenodd"
-                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                clipRule="evenodd"
-              />
-            </svg>
-          </div>
-          <div className="ml-3">
-            <p className="text-sm text-red-700">
-              Failed to load reports. Please try again later.
-            </p>
+      <div className="px-8 py-8">
+        <div className="mb-8">
+          <h1 className="text-4xl font-extrabold text-gray-900">Reports</h1>
+          <p className="text-gray-500 text-lg mt-1">
+            Library analytics and reports
+          </p>
+        </div>
+        <div className="bg-red-50 border-l-4 border-red-400 p-4">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg
+                className="h-5 w-5 text-red-400"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-red-700">
+                Failed to load reports. Please try again later.
+              </p>
+              <p className="text-xs text-red-600 mt-1">
+                Error: {(error as any)?.message || "Unknown error"}
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -145,6 +223,18 @@ export default function Reports() {
           Library analytics and reports
         </p>
       </div>
+
+      {/* Debug section - only show in development */}
+      {process.env.NODE_ENV === "development" && (
+        <div className="mb-8 p-4 bg-gray-100 rounded-lg">
+          <h3 className="font-semibold mb-2">Debug Info:</h3>
+          <div className="text-sm space-y-2">
+            <div>Overdue Books: {overdueBooks.length} items</div>
+            <div>Popular Genres: {popularGenres.length} items</div>
+            <div>Summary Stats: {summaryStats ? "Loaded" : "Not loaded"}</div>
+          </div>
+        </div>
+      )}
 
       <div className="grid gap-8 lg:grid-cols-2 mb-8">
         <div className="bg-white rounded-2xl shadow p-8">
