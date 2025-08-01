@@ -13,6 +13,7 @@ import api from "../../lib/api";
 import Button from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
 import Select from "../../components/ui/Select";
+import toast from "react-hot-toast";
 const bookSchema = z.object({
   title: z.string().min(1, "Title is required"),
   author: z.string().min(1, "Author is required"),
@@ -75,6 +76,7 @@ export default function BookForm({
           available_copies: Number(data.availableCopies),
         };
         await api.patch(`/books/${defaultValues.id}`, payload);
+        toast.success(`Book "${data.title}" updated successfully!`);
       } else {
         const payload = {
           title: data.title,
@@ -84,6 +86,7 @@ export default function BookForm({
           available_copies: Number(data.availableCopies),
         };
         await api.post("/books", payload);
+        toast.success(`Book "${data.title}" added successfully!`);
       }
       if (onSuccess) {
         onSuccess();
@@ -92,6 +95,7 @@ export default function BookForm({
       }
     } catch (error) {
       const errorMessage = error.response?.data?.message || "An error occurred";
+      toast.error(errorMessage);
       if (error.response?.data?.errors) {
         Object.entries(error.response.data.errors).forEach(
           ([field, message]) => {
@@ -196,7 +200,7 @@ export default function BookForm({
                       id: "title",
                       ...register("title"),
                       error: errors.title?.message,
-                      placeholder: "Enter book title",
+                      placeholder: "e.g., The Great Gatsby",
                       fullWidth: true,
                     }),
                   }),
@@ -224,7 +228,7 @@ export default function BookForm({
                       id: "author",
                       ...register("author"),
                       error: errors.author?.message,
-                      placeholder: "Enter author name",
+                      placeholder: "e.g., F. Scott Fitzgerald",
                       fullWidth: true,
                     }),
                   }),
